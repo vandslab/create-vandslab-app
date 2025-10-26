@@ -1,0 +1,65 @@
+{
+	"name": "create-vandslab-app",
+	"version": "1.0.0",
+	"description": "Interactive CLI to create Vandslab projects with customizable templates",
+	"type": "module",
+	"bin": {
+		"create-vandslab-app": "./bin/cli.js"
+	},
+	"scripts": {
+		"build": "tsc",
+		"dev": "tsc --watch",
+		"test": "node --test",
+		"prepublishOnly": "pnpm build"
+	},
+	"keywords": [
+		"cli",
+		"create-app",
+		"template",
+		"generator",
+		"scaffold",
+		"boilerplate",
+		"starter",
+		"nextjs",
+		"vite",
+		"react",
+		"express",
+		"nestjs",
+		"turborepo",
+		"monorepo",
+		"typescript",
+		"tailwind",
+		"prisma",
+		"typeorm",
+		"vandslab"
+	],
+	"author": "Vandslab",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Skaikru0518/create-vandslab-app.git"
+	},
+	"bugs": {
+		"url": "https://github.com/Skaikru0518/create-vandslab-app/issues"
+	},
+	"homepage": "https://github.com/Skaikru0518/create-vandslab-app#readme",
+	"dependencies": {
+		"@clack/prompts": "^0.8.2",
+		"chalk": "^5.3.0",
+		"fs-extra": "^11.2.0",
+		"picocolors": "^1.1.1"
+	},
+	"devDependencies": {
+		"@types/fs-extra": "^11.0.4",
+		"@types/node": "^22.10.2",
+		"typescript": "^5.7.2"
+	},
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"files": [
+		"bin",
+		"dist",
+		"templates"
+	]
+}
