@@ -37,12 +37,12 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Skaikru0518/create-vandslab-app.git"
+		"url": "https://github.com/vandslab/create-vandslab-app.git"
 	},
 	"bugs": {
-		"url": "https://github.com/Skaikru0518/create-vandslab-app/issues"
+		"url": "https://github.com/vandslab/create-vandslab-app/issues"
 	},
-	"homepage": "https://github.com/Skaikru0518/create-vandslab-app#readme",
+	"homepage": "https://github.com/vandslab/create-vandslab-app#readme",
 	"dependencies": {
 		"@clack/prompts": "^0.8.2",
 		"chalk": "^5.3.0",
