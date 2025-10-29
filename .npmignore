@@ -51,3 +51,8 @@ templates/**/prisma/*.db-journal
 !package.json
 !README.md
 !LICENSE
+
+# Force include dot files in templates
+!templates/**/.npmrc
+!templates/**/.gitignore
+!templates/**/.env.example
