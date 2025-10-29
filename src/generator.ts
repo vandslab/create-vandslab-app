@@ -161,9 +161,6 @@ async function copySharedConfigs(
 
   // Copy TypeScript config
   await copyDirectory(path.join(configsDir, 'typescript-config'), path.join(packagesPath, 'typescript-config'));
-
-  // Copy ESLint config
-  await copyDirectory(path.join(configsDir, 'eslint-config'), path.join(packagesPath, 'eslint-config'));
 }
 
 async function generateStandaloneRootPackageJson(targetPath: string, config: ProjectConfig): Promise<void> {
