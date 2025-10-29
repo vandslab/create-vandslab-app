@@ -123,3 +123,30 @@ export function getTemplatesDir(): string {
   // When running from dist, go up one level to find templates
   return path.join(process.cwd(), 'templates');
 }
+
+/**
+ * Rename all .template files to their proper dot file names
+ * e.g., npmrc.template -> .npmrc
+ */
+export async function renameDotFiles(dirPath: string): Promise<void> {
+  async function walkDir(dir: string): Promise<void> {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        await walkDir(fullPath);
+      } else if (entry.isFile() && entry.name.endsWith('.template')) {
+        // Remove .template extension and add dot prefix
+        const baseName = entry.name.replace('.template', '');
+        const newName = `.${baseName}`;
+        const newPath = path.join(dir, newName);
+
+        await fs.rename(fullPath, newPath);
+      }
+    }
+  }
+
+  await walkDir(dirPath);
+}

@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ProjectConfig } from './prompts.js';
-import { copyDirectory, copyFile, replaceInDirectory } from './utils.js';
+import { copyDirectory, copyFile, replaceInDirectory, renameDotFiles } from './utils.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -44,6 +44,9 @@ export async function generateProject(config: ProjectConfig): Promise<void> {
 
   await replaceInDirectory(targetPath, replacements);
 
+  // Rename all .template files to proper dot files (.npmrc, .gitignore, etc.)
+  await renameDotFiles(targetPath);
+
   // Generate README
   await generateReadme(targetPath, config);
 }
@@ -58,17 +61,11 @@ async function copyBaseFiles(
   // Copy Dockerfile
   await copyFile(path.join(baseDir, 'Dockerfile'), path.join(targetPath, 'Dockerfile'));
 
-  // Copy .npmrc
-  await copyFile(path.join(baseDir, '.npmrc'), path.join(targetPath, '.npmrc'));
-
-  // Copy .gitignore
-  await copyFile(path.join(baseDir, '.gitignore'), path.join(targetPath, '.gitignore'));
-
-  // Copy ESLint config
-  await copyFile(path.join(baseDir, '.eslintrc.json'), path.join(targetPath, '.eslintrc.json'));
-
-  // Copy Prettier config
-  await copyFile(path.join(baseDir, '.prettierrc'), path.join(targetPath, '.prettierrc'));
+  // Copy template files (will be renamed to dot files later)
+  await copyFile(path.join(baseDir, 'npmrc.template'), path.join(targetPath, 'npmrc.template'));
+  await copyFile(path.join(baseDir, 'gitignore.template'), path.join(targetPath, 'gitignore.template'));
+  await copyFile(path.join(baseDir, 'eslintrc.json.template'), path.join(targetPath, 'eslintrc.json.template'));
+  await copyFile(path.join(baseDir, 'prettierrc.template'), path.join(targetPath, 'prettierrc.template'));
 }
 
 async function generateMonorepo(
