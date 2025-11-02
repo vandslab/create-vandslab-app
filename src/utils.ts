@@ -13,11 +13,17 @@ export async function copyDirectory(src: string, dest: string): Promise<void> {
   await fs.copy(src, dest, {
     overwrite: true,
     errorOnExist: false,
-    filter: (src) => {
-      // Skip node_modules and pnpm-lock.yaml
-      if (src.includes('node_modules') || src.includes('pnpm-lock.yaml')) {
+    filter: (srcPath) => {
+      // Get the relative path from the source directory
+      const relativePath = path.relative(src, srcPath);
+
+      // Skip node_modules and pnpm-lock.yaml within the template being copied
+      // Use path separators to avoid false positives in the absolute path
+      const parts = relativePath.split(path.sep);
+      if (parts.includes('node_modules') || parts.includes('pnpm-lock.yaml')) {
         return false;
       }
+
       // Copy everything else including dot files
       return true;
     },

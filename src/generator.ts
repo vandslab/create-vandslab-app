@@ -144,13 +144,6 @@ async function generateBackend(
 ): Promise<void> {
   // Select backend template based on framework choice
   const backendTemplate = path.join(templatesDir, 'backend', config.backend);
-
-  console.log('[DEBUG] generateBackend called');
-  console.log('[DEBUG] templatesDir:', templatesDir);
-  console.log('[DEBUG] backendTemplate:', backendTemplate);
-  console.log('[DEBUG] targetPath:', targetPath);
-  console.log('[DEBUG] backend framework:', config.backend);
-
   await copyDirectory(backendTemplate, targetPath);
 
   // Note: Each backend template includes its own setup
