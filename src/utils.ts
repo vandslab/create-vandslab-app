@@ -5,6 +5,11 @@ import path from 'node:path';
  * Copy a directory recursively
  */
 export async function copyDirectory(src: string, dest: string): Promise<void> {
+  // Check if source exists
+  if (!(await fs.pathExists(src))) {
+    throw new Error(`Source directory does not exist: ${src}`);
+  }
+
   await fs.copy(src, dest, {
     overwrite: true,
     errorOnExist: false,

@@ -20,6 +20,7 @@ out
 *.pem
 .vscode
 .idea
+.testing
 
 # Debug
 npm-debug.log*
