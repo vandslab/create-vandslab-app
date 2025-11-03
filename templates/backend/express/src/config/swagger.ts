@@ -1,18 +1,28 @@
 import swaggerUi from "swagger-ui-express";
-import YAML from "yamljs";
 import path from "path";
 import { Application } from "express";
 import { logger } from "@/middlewares/console-logger";
+import fs from "fs";
 
 /**
  * Setup Swagger UI documentation
- * Loads OpenAPI YAML spec and serves interactive API docs at /api-docs
+ * Loads auto-generated swagger-output.json from swagger-autogen
+ * Serves interactive API docs at /api-docs
  */
 export const setupSwagger = (app: Application): void => {
 	try {
-		// Load OpenAPI YAML file
-		const swaggerDocument = YAML.load(
-			path.join(__dirname, "../docs/openapi.yaml")
+		// Load auto-generated Swagger JSON file (from swagger-autogen)
+		const swaggerPath = path.join(__dirname, "../docs/swagger-output.json");
+
+		if (!fs.existsSync(swaggerPath)) {
+			logger.warn(
+				"Swagger documentation file not found. Run 'pnpm swagger' to generate it."
+			);
+			return;
+		}
+
+		const swaggerDocument = JSON.parse(
+			fs.readFileSync(swaggerPath, "utf-8")
 		);
 
 		// Swagger UI options

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import healthRoutes from "./health.routes";
+import authRoutes from "./auth.routes";
 
 const router: Router = Router();
 
@@ -9,9 +10,6 @@ const router: Router = Router();
  */
 
 router.use("/health", healthRoutes);
-
-/**
- * add routes like router.use("/auth", authRoutes)
- */
+router.use("/auth", authRoutes);
 
 export default router;
