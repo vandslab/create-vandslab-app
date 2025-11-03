@@ -161,3 +161,25 @@ export async function renameDotFiles(dirPath: string): Promise<void> {
 
   await walkDir(dirPath);
 }
+
+/**
+ * Remove all .gitkeep files from the generated project
+ * These files are only used to keep empty directories in the npm package
+ */
+export async function removeGitkeepFiles(dirPath: string): Promise<void> {
+  async function walkDir(dir: string): Promise<void> {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        await walkDir(fullPath);
+      } else if (entry.isFile() && entry.name === '.gitkeep') {
+        await fs.remove(fullPath);
+      }
+    }
+  }
+
+  await walkDir(dirPath);
+}

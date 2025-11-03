@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ProjectConfig } from './prompts.js';
-import { copyDirectory, copyFile, replaceInDirectory, renameDotFiles } from './utils.js';
+import { copyDirectory, copyFile, replaceInDirectory, renameDotFiles, removeGitkeepFiles } from './utils.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -46,6 +46,9 @@ export async function generateProject(config: ProjectConfig): Promise<void> {
 
   // Rename all .template files to proper dot files (.npmrc, .gitignore, etc.)
   await renameDotFiles(targetPath);
+
+  // Remove .gitkeep files (they're only needed to preserve empty dirs in npm package)
+  await removeGitkeepFiles(targetPath);
 
   // Generate README
   await generateReadme(targetPath, config);
