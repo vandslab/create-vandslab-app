@@ -9,7 +9,7 @@ export const logger = pino({
 				target: "pino-pretty",
 				options: {
 					colorize: true,
-					translateTime: "SYS:standard",
+					translateTime: "yyyy-mm-dd HH:MM:ss",
 					ignore: "pid,hostname",
 					customColors: "info:blue,warn:yellow,error:red",
 				},
