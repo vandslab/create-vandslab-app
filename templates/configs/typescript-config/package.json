@@ -1,13 +1,13 @@
 {
-  "name": "@{{PROJECT_NAME}}/typescript-config",
-  "version": "0.1.0",
-  "private": true,
-  "engines": {
-    "pnpm": ">=9.0.0"
-  },
-  "files": [
-    "base.json",
-    "nextjs.json",
-    "node.json"
-  ]
+	"name": "@repo/typescript-config",
+	"version": "0.1.0",
+	"private": true,
+	"engines": {
+		"pnpm": ">=10.0.0"
+	},
+	"files": [
+		"base.json",
+		"nextjs.json",
+		"node.json"
+	]
 }
