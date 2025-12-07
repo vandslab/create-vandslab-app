@@ -20,6 +20,15 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@/*": ["src/*"],
+      "@common/*": ["src/common/*"],
+      "@decorators/*": ["src/decorators/*"],
+      "@guards/*": ["src/guards/*"],
+      "@modules/*": ["src/modules/*"],
+      "@interfaces/*": ["src/interfaces/*"],
+      "@interceptors/*": ["src/common/interceptors/*"]
+    }
   }
 }
