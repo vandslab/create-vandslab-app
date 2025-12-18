@@ -65,7 +65,13 @@ fi
 
 # Publish to npm
 echo "🚀 Publishing to npm..."
-npm publish --access public
+read -p "Enter npm 2FA code (or press Enter if using token): " otp_code
+
+if [ -n "$otp_code" ]; then
+    npm publish --access public --otp="$otp_code"
+else
+    npm publish --access public
+fi
 
 if [ $? -eq 0 ]; then
     echo "✅ Successfully published create-vandslab-app@$NEW_VERSION"
