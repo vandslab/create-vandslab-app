@@ -47,7 +47,7 @@ async function main() {
 		s.stop("Project created successfully!");
 
 		p.note(
-			`Next steps:\n\n  cd ${config.projectName}\n  pnpm install\n  pnpm dev`,
+			`Next steps:\n\n  cd ${config.projectName}\n  pnpm install\n  pnpm dev\n\n💡 TIP: Update dependencies anytime with:\n  node scripts/update-deps.js\n  pnpm install`,
 			"Ready to go!"
 		);
 
