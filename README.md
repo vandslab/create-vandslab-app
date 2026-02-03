@@ -13,8 +13,7 @@ Create production-ready monorepos and standalone projects with your preferred te
 
 ### Frontend Frameworks
 
-- **Next.js 15** - Stable App Router with React 19
-- **Next.js 16** - Latest with built-in improvements
+- **Next.js 16** - Latest with Turbopack and built-in improvements
 - **Vite** - Lightning fast HMR with React 19
 
 ### Backend Frameworks
@@ -96,13 +95,39 @@ pnpm lint       # Lint code
 - **Prettier** code formatting
 - **Git** with .gitignore
 - **Environment variables** setup
-- **Docker** ready (optional)
+- **Docker** production-ready with optimized multi-stage builds
 - **Hot Module Replacement**
+
+### Docker Support
+
+Each template includes optimized production Dockerfiles:
+
+- **Multi-stage builds** for minimal image sizes
+- **Non-root users** for security (uid/gid 99995)
+- **BuildKit cache mounts** for faster builds
+- **Optimized layer caching** to minimize rebuild times
+- **Production dependencies only** in final images
+
+Build and run:
+
+```bash
+# Build Docker image
+docker build -t my-app .
+
+# Run container
+docker run -p 3000:3000 my-app  # Frontend
+docker run -p 4000:4000 my-app  # Backend
+```
+
+**Image sizes:**
+- Vite frontend: ~90MB
+- Next.js frontend: ~330MB (standalone mode)
+- Express/NestJS backend: ~200-250MB
 
 ## Requirements
 
 - Node.js >= 20.0.0
-- pnpm >= 9.0.0
+- pnpm >= 10.0.0
 
 ## License
 
