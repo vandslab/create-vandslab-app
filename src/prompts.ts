@@ -6,7 +6,7 @@ import fs from 'fs-extra';
 export interface ProjectConfig {
   projectName: string;
   projectType: 'monorepo' | 'standalone';
-  frontend: 'vite' | 'nextjs-15' | 'nextjs-16' | 'none';
+  frontend: 'vite' | 'nextjs-16' | 'none';
   backend: 'express' | 'nestjs' | 'nestjs-prisma' | 'none';
   uiLibrary: 'none' | 'shadcn' | 'chakra' | 'daisyui';
   targetPath: string;
@@ -80,8 +80,7 @@ export async function runPrompts(initialProjectName?: string): Promise<ProjectCo
         p.select({
           message: 'Which frontend framework?',
           options: [
-            { value: 'nextjs-15', label: 'Next.js 15', hint: 'React framework (stable)' },
-            { value: 'nextjs-16', label: 'Next.js 16', hint: 'React framework (latest)' },
+            { value: 'nextjs-16', label: 'Next.js 16', hint: 'React framework with Turbopack' },
             { value: 'vite', label: 'Vite + React', hint: 'Fast, lightweight' },
             ...(results.projectType === 'standalone' ? [{ value: 'none' as const, label: 'None', hint: 'Backend only' }] : []),
           ],

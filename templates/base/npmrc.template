@@ -1,8 +1,10 @@
-# pnpm configuration
+# Use flat node_modules structure without symlinks (like npm)
+shamefully-hoist=true
+node-linker=hoisted
+
+# Dependencies
 auto-install-peers=true
 strict-peer-dependencies=false
-shamefully-hoist=false
-
 
 # Performance
 prefer-frozen-lockfile=true
@@ -10,10 +12,7 @@ engine-strict=true
 
 # Security
 audit-level=moderate
-minimumReleaseAge=1440 # dont install packages that are published in one day
+minimumReleaseAge=1440
 
-# Enable install scripts for native dependencies (required for bcrypt, sharp, prisma, etc.)
+# Enable install scripts for native dependencies (bcrypt, prisma, etc.)
 enable-scripts=true
-
-# Enable workspace package injection for pnpm deploy (required for pnpm v10+)
-inject-workspace-packages=true

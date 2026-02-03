@@ -9,15 +9,15 @@
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"dev": "next dev",
-		"build": "next build --turbopack && node -e \"const fs=require('fs');const path=require('path');const src='.next/static';const dest='.next/standalone/apps/web/.next/static';fs.cpSync(src,dest,{recursive:true});const pubSrc='public';const pubDest='.next/standalone/apps/web/public';if(fs.existsSync(pubSrc))fs.cpSync(pubSrc,pubDest,{recursive:true});\"",
+		"build": "next build --turbopack",
 		"start": "next start",
 		"lint": "next lint",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"react": "19.2.3",
-		"react-dom": "19.2.3",
-		"next": "16.1.0"
+		"react": "19.2.4",
+		"react-dom": "19.2.4",
+		"next": "16.1.6"
 	},
 	"devDependencies": {
 		"typescript": "^5",

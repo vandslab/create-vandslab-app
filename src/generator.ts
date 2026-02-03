@@ -68,12 +68,6 @@ async function copyBaseFiles(
 ): Promise<void> {
 	const baseDir = path.join(templatesDir, "base");
 
-	// Copy Dockerfile
-	await copyFile(
-		path.join(baseDir, "Dockerfile"),
-		path.join(targetPath, "Dockerfile")
-	);
-
 	// Copy template files (will be renamed to dot files later)
 	await copyFile(
 		path.join(baseDir, "npmrc.template"),

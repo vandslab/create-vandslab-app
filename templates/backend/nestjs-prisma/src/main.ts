@@ -1,12 +1,9 @@
-import 'tsconfig-paths/register';
-
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { RequestInterceptor } from '@/common/interceptors/request.interceptor';
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes';
-import { json } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -18,19 +15,6 @@ async function bootstrap() {
   });
   const logger = new Logger();
   app.useGlobalInterceptors(new RequestInterceptor());
-
-  // Raw body middleware for webhook signature verification
-  // This captures the raw body before JSON parsing for webhook endpoints
-  app.use(
-    json({
-      verify: (req: any, res, buf) => {
-        // Store raw body buffer for webhook signature verification
-        if (req.url?.includes('/webhooks')) {
-          req.rawBody = buf;
-        }
-      },
-    }),
-  );
 
   // validation pipe
   app.useGlobalPipes(
