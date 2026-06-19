@@ -1,0 +1,4 @@
+minimumReleaseAgeExclude:
+  - '@types/node@26.0.0'
+overrides:
+  create-vandslab-app: 'link:'

@@ -13,8 +13,7 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function generateProject(config: ProjectConfig): Promise<void> {
-	const { projectName, projectType, frontend, backend, targetPath, uiLibrary } =
-		config;
+	const { projectName, projectType, frontend, backend, targetPath } = config;
 
 	// Create project directory
 	await fs.ensureDir(targetPath);
@@ -29,17 +28,6 @@ export async function generateProject(config: ProjectConfig): Promise<void> {
 		await generateMonorepo(templatesDir, targetPath, config);
 	} else {
 		await generateStandalone(templatesDir, targetPath, config);
-	}
-
-	// Add UI library if selected
-	if (uiLibrary && uiLibrary !== "none" && frontend !== "none") {
-		// Determine the correct path based on project structure
-		let appPath = targetPath;
-		if (projectType === "standalone" && backend !== "none") {
-			// Standalone with both frontend and backend - frontend is in subfolder
-			appPath = path.join(targetPath, "frontend");
-		}
-		await addUILibrary(templatesDir, appPath, config);
 	}
 
 	// Replace placeholders in all generated files
@@ -327,6 +315,8 @@ async function generateReadme(
 		const frontendName =
 			frontend === "vite"
 				? "Vite + React"
+				: frontend === "nuxt"
+				? "Nuxt 4 + Vue"
 				: `Next.js ${frontend.split("-")[1]}`;
 		readme += `- **Frontend**: ${frontendName} + TypeScript + Tailwind CSS\n`;
 	}

@@ -6,8 +6,10 @@ import fs from 'fs-extra';
 export interface ProjectConfig {
   projectName: string;
   projectType: 'monorepo' | 'standalone';
-  frontend: 'vite' | 'nextjs-16' | 'none';
+  frontend: 'vite' | 'nextjs-16' | 'nuxt' | 'none';
   backend: 'express' | 'nestjs' | 'nestjs-prisma' | 'none';
+  // Not prompted in the CLI anymore; kept so the (retained) UI-library
+  // helpers in generator.ts still type-check. Always 'none' at runtime.
   uiLibrary: 'none' | 'shadcn' | 'chakra' | 'daisyui';
   targetPath: string;
 }
@@ -82,6 +84,7 @@ export async function runPrompts(initialProjectName?: string): Promise<ProjectCo
           options: [
             { value: 'nextjs-16', label: 'Next.js 16', hint: 'React framework with Turbopack' },
             { value: 'vite', label: 'Vite + React', hint: 'Fast, lightweight' },
+            { value: 'nuxt', label: 'Nuxt 4', hint: 'Vue meta-framework (SSR)' },
             ...(results.projectType === 'standalone' ? [{ value: 'none' as const, label: 'None', hint: 'Backend only' }] : []),
           ],
           initialValue: 'nextjs-16',
@@ -108,20 +111,6 @@ export async function runPrompts(initialProjectName?: string): Promise<ProjectCo
               ],
               initialValue: 'none',
             }),
-
-      uiLibrary: ({ results }) =>
-        results.frontend !== 'none'
-          ? p.select({
-              message: 'Would you like to add a UI component library?',
-              options: [
-                { value: 'none', label: 'None', hint: 'Just Tailwind CSS' },
-                { value: 'shadcn', label: 'shadcn/ui', hint: 'Copy-paste components with Radix UI' },
-                { value: 'chakra', label: 'Chakra UI', hint: 'Modular and accessible component library' },
-                { value: 'daisyui', label: 'DaisyUI', hint: 'Tailwind CSS components plugin' },
-              ],
-              initialValue: 'shadcn',
-            })
-          : Promise.resolve('none'),
     },
     {
       onCancel: () => {
@@ -138,6 +127,7 @@ export async function runPrompts(initialProjectName?: string): Promise<ProjectCo
 
   return {
     ...options,
+    uiLibrary: 'none',
     targetPath,
   } as ProjectConfig;
 }

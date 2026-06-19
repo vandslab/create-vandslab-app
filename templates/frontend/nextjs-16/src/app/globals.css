@@ -1,1 +1,28 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
+
+/* next-themes toggles `.dark` on <html>; drive the `dark:` variant from it */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-ink: #0b1220;
+  --color-paper: #eef2f4;
+  --color-panel: #ffffff;
+  --color-line: #d3dbdf;
+  --color-aqua: #00b5c7;
+  --color-aqua-deep: #0a6e8a;
+
+  --font-sans: "Public Sans", system-ui, sans-serif;
+  --font-display: "Archivo", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* dark theme: flip the semantic tokens, every `bg-paper`/`text-ink`/… follows */
+.dark {
+  --color-ink: #e7ecef;
+  --color-paper: #0b1220;
+  --color-panel: #111b2e;
+  --color-line: #243044;
+  --color-aqua: #1fc6d8;
+  --color-aqua-deep: #5fd7e6;
+}

@@ -15,17 +15,12 @@ Create production-ready monorepos and standalone projects with your preferred te
 
 - **Next.js 16** - Latest with Turbopack and built-in improvements
 - **Vite** - Lightning fast HMR with React 19
+- **Nuxt 4** - Vue meta-framework with SSR (Nitro)
 
 ### Backend Frameworks
 
 - **Express.js** - Fast & flexible with Prisma ORM
 - **NestJS** - Enterprise-grade with TypeORM / Prisma ORM
-
-### UI Libraries
-
-- **shadcn/ui** - Modern components with Radix UI
-- **Chakra UI** - Modular component library
-- **DaisyUI** - Tailwind CSS components
 
 ### Technologies
 

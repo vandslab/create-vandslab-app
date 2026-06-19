@@ -21,7 +21,7 @@ export async function copyDirectory(src: string, dest: string): Promise<void> {
       // template but must never leak into a generated project.
       // Use path separators to avoid false positives in the absolute path.
       const parts = relativePath.split(path.sep);
-      const skipDirs = ['node_modules', '.git', 'dist'];
+      const skipDirs = ['node_modules', '.git', 'dist', '.nuxt', '.output'];
       if (parts.some((part) => skipDirs.includes(part))) {
         return false;
       }
