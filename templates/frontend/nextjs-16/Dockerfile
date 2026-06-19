@@ -10,12 +10,14 @@ WORKDIR /app
 
 ENV NEXT_PUBLIC_API_URL=/api
 
+
 # Copy everything (node_modules and .next excluded via .dockerignore)
 COPY . .
 
 # Install dependencies and build
+# pnpm 11 errors on un-approved build scripts. Skip all (sharp uses prebuilt binaries via optional deps, no postinstall needed)
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm install && pnpm run build
+    pnpm install --ignore-scripts && pnpm run build
 
 # ---------- Production Stage ----------
 FROM node:22-alpine

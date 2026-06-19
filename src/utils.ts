@@ -17,10 +17,15 @@ export async function copyDirectory(src: string, dest: string): Promise<void> {
       // Get the relative path from the source directory
       const relativePath = path.relative(src, srcPath);
 
-      // Skip node_modules and pnpm-lock.yaml within the template being copied
-      // Use path separators to avoid false positives in the absolute path
+      // Skip build/VCS/secret artifacts that may exist on disk inside a
+      // template but must never leak into a generated project.
+      // Use path separators to avoid false positives in the absolute path.
       const parts = relativePath.split(path.sep);
-      if (parts.includes('node_modules') || parts.includes('pnpm-lock.yaml')) {
+      const skipDirs = ['node_modules', '.git', 'dist'];
+      if (parts.some((part) => skipDirs.includes(part))) {
+        return false;
+      }
+      if (parts.includes('pnpm-lock.yaml') || parts.includes('.env')) {
         return false;
       }
 
