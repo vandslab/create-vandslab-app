@@ -44,3 +44,7 @@ lerna-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 claude.md
+
+# pnpm self-link artifacts (this is a CLI tool, not an app — no lockfile/workspace here)
+pnpm-lock.yaml
+pnpm-workspace.yaml
