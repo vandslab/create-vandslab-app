@@ -1,6 +1,6 @@
 {
 	"name": "create-vandslab-app",
-	"version": "1.2.1",
+	"version": "1.3.0",
 	"description": "Interactive CLI to create Vandslab projects with customizable templates",
 	"type": "module",
 	"bin": {
