@@ -19,7 +19,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 10
+          version: 11
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -34,7 +34,7 @@ jobs:
         run: pnpm build
 
       - name: Run tests
-        run: pnpm test || true  # Continue even if no tests
+        run: pnpm test
 
       - name: Set version (if provided)
         if: github.event.inputs.version != ''
