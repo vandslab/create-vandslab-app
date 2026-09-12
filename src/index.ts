@@ -33,11 +33,6 @@ async function main() {
 	// Get project configuration from prompts
 	const config = await runPrompts(cliProjectName);
 
-	if (p.isCancel(config)) {
-		p.cancel("Operation cancelled.");
-		process.exit(0);
-	}
-
 	// Start project generation
 	const s = p.spinner();
 	s.start("Creating your project...");

@@ -66,10 +66,6 @@ async function copyBaseFiles(
 		path.join(targetPath, "gitignore.template")
 	);
 	await copyFile(
-		path.join(baseDir, "eslintrc.json.template"),
-		path.join(targetPath, "eslintrc.json.template")
-	);
-	await copyFile(
 		path.join(baseDir, "prettierrc.template"),
 		path.join(targetPath, "prettierrc.template")
 	);
@@ -118,13 +114,6 @@ async function generateMonorepo(
 			config
 		);
 	}
-
-	// Copy shared configs
-	await copySharedConfigs(
-		templatesDir,
-		path.join(targetPath, "packages"),
-		config
-	);
 }
 
 async function generateStandalone(
@@ -184,20 +173,6 @@ async function generateBackend(
 	// - nestjs-prisma: Prisma, Auth (JWT), Swagger
 }
 
-async function copySharedConfigs(
-	templatesDir: string,
-	packagesPath: string,
-	config: ProjectConfig
-): Promise<void> {
-	const configsDir = path.join(templatesDir, "configs");
-
-	// Copy TypeScript config
-	await copyDirectory(
-		path.join(configsDir, "typescript-config"),
-		path.join(packagesPath, "typescript-config")
-	);
-}
-
 async function generateStandaloneRootPackageJson(
 	targetPath: string,
 	config: ProjectConfig
@@ -227,9 +202,9 @@ async function generateStandaloneRootPackageJson(
 			"typecheck:backend": "cd backend && pnpm typecheck",
 		},
 		devDependencies: {
-			concurrently: "^9.1.0",
-			"@types/node": "^22.10.2",
-			typescript: "^5.7.2",
+			concurrently: "^10.0.5",
+			"@types/node": "^26.0.0",
+			typescript: "^6.0.3",
 		},
 		packageManager: "pnpm@10.20.0",
 	};
@@ -262,11 +237,11 @@ async function generateRootPackageJson(
 			clean: "turbo clean",
 		},
 		devDependencies: {
-			turbo: "^2.3.3",
-			"@types/node": "^22.10.2",
-			typescript: "^5.7.2",
-			prettier: "^3.4.2",
-			eslint: "^9.17.0",
+			turbo: "^2.10.12",
+			"@types/node": "^26.0.0",
+			typescript: "^6.0.3",
+			prettier: "^3.8.4",
+			eslint: "^10.5.0",
 		},
 		packageManager: "pnpm@10.20.0",
 	};

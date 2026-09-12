@@ -112,33 +112,6 @@ export async function replaceInDirectory(
   }
 }
 
-/**
- * Create a package.json file
- */
-export async function createPackageJson(
-  targetPath: string,
-  projectName: string,
-  config: any
-): Promise<void> {
-  const packageJson = {
-    name: projectName,
-    version: '0.1.0',
-    private: true,
-    scripts: {},
-    dependencies: {},
-    devDependencies: {},
-  };
-
-  await fs.writeJson(path.join(targetPath, 'package.json'), packageJson, { spaces: 2 });
-}
-
-/**
- * Get the templates directory path
- */
-export function getTemplatesDir(): string {
-  // When running from dist, go up one level to find templates
-  return path.join(process.cwd(), 'templates');
-}
 
 /**
  * Rename all .template files to their proper dot file names
