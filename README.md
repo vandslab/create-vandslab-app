@@ -117,7 +117,9 @@ docker run -p 4000:4000 my-app  # Backend
 **Image sizes:**
 - Vite frontend: ~90MB
 - Next.js frontend: ~330MB (standalone mode)
-- Express/NestJS backend: ~200-250MB
+- Express backend: ~300MB
+- NestJS + Prisma backend: ~360MB
+- NestJS + TypeORM backend: ~480MB
 
 ## Requirements
 

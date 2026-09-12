@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import * as bcrypt from 'bcrypt';
+import { hash } from '@node-rs/argon2';
 
 @Injectable()
 export class UsersService {
@@ -24,7 +24,7 @@ export class UsersService {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const hashedPassword = await hash(createUserDto.password);
 
     // Create user
     const user = this.userRepository.create({
@@ -41,7 +41,14 @@ export class UsersService {
 
   async findAll() {
     const users = await this.userRepository.find({
-      select: ['id', 'email', 'name', 'role', 'createdAt', 'updatedAt'],
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
     return users;
   }
@@ -49,7 +56,14 @@ export class UsersService {
   async findOne(id: string) {
     const user = await this.userRepository.findOne({
       where: { id },
-      select: ['id', 'email', 'name', 'role', 'createdAt', 'updatedAt'],
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     if (!user) {
@@ -72,7 +86,7 @@ export class UsersService {
 
     // Hash password if it's being updated
     if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+      updateUserDto.password = await hash(updateUserDto.password);
     }
 
     await this.userRepository.update(id, updateUserDto);

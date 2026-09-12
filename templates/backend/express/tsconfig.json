@@ -3,29 +3,31 @@
 	"compilerOptions": {
 		// File Layout
 		"outDir": "./dist",
-		"baseUrl": "./src",
+		"rootDir": "./src",
+		// No "baseUrl": deprecated in TypeScript 6. Path mappings are resolved
+		// relative to this file instead, so each target carries the ./src prefix.
 		"paths": {
-			"@/*": ["./*"],
-			"@api/*": ["api/*"],
-			"@controllers/*": ["api/controllers/*"],
-			"@services/*": ["api/services/*"],
-			"@routes/*": ["api/routes/*"],
-			"@middlewares/*": ["middlewares/*"],
-			"@config/*": ["config/*"],
-			"@exceptions/*": ["exceptions/*"],
-			"@types/*": ["types/*"],
-			"@interfaces/*": ["interfaces/*"],
-			"@schemas/*": ["schemas/*"],
-			"@enums/*": ["enums/*"],
-			"@utils/*": ["utils/*"],
-			"@generated/*": ["generated/*"]
+			"@/*": ["./src/*"],
+			"@api/*": ["./src/api/*"],
+			"@controllers/*": ["./src/api/controllers/*"],
+			"@services/*": ["./src/api/services/*"],
+			"@routes/*": ["./src/api/routes/*"],
+			"@middlewares/*": ["./src/middlewares/*"],
+			"@config/*": ["./src/config/*"],
+			"@exceptions/*": ["./src/exceptions/*"],
+			"@types/*": ["./src/types/*"],
+			"@interfaces/*": ["./src/interfaces/*"],
+			"@schemas/*": ["./src/schemas/*"],
+			"@enums/*": ["./src/enums/*"],
+			"@utils/*": ["./src/utils/*"],
+			"@generated/*": ["./src/generated/*"]
 		},
 
 		// Environment Settings
 		// See also https://aka.ms/tsconfig/module
 		"module": "commonjs",
 		"target": "es2024",
-		"types": ["node", "jest"],
+		"types": ["node", "vitest/globals"],
 		// For nodejs:
 		// "lib": ["esnext"],
 		// "types": ["node"],
@@ -58,5 +60,5 @@
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true
 	},
-	"include": ["src", "test"]
+	"include": ["src"]
 }

@@ -39,7 +39,7 @@ export async function generateProject(config: ProjectConfig): Promise<void> {
 
 	await replaceInDirectory(targetPath, replacements);
 
-	// Rename all .template files to proper dot files (.npmrc, .gitignore, etc.)
+	// Rename all .template files to proper dot files (.gitignore, .prettierrc, etc.)
 	await renameDotFiles(targetPath);
 
 	// Remove .gitkeep files (they're only needed to preserve empty dirs in npm package)
@@ -58,16 +58,37 @@ async function copyBaseFiles(
 
 	// Copy template files (will be renamed to dot files later)
 	await copyFile(
-		path.join(baseDir, "npmrc.template"),
-		path.join(targetPath, "npmrc.template")
-	);
-	await copyFile(
 		path.join(baseDir, "gitignore.template"),
 		path.join(targetPath, "gitignore.template")
+	);
+	// pnpm 10+ reads nodeLinker/settings here; the monorepo branch overwrites
+	// this file with its own copy, which carries the same setting.
+	await copyFile(
+		path.join(baseDir, "pnpm-workspace.yaml.template"),
+		path.join(targetPath, "pnpm-workspace.yaml")
 	);
 	await copyFile(
 		path.join(baseDir, "prettierrc.template"),
 		path.join(targetPath, "prettierrc.template")
+	);
+}
+
+/**
+ * Give an app directory its own pnpm settings.
+ *
+ * A CI checkout rule can pull a single app out of the monorepo, and that
+ * directory then has no workspace root above it to inherit nodeLinker from.
+ * Without this the app installs isolated, where the Prisma client cannot
+ * resolve itself. Harmless inside the workspace: pnpm keeps using the root
+ * config for workspace installs.
+ */
+async function writeAppWorkspaceConfig(
+	templatesDir: string,
+	appDir: string
+): Promise<void> {
+	await copyFile(
+		path.join(templatesDir, "base", "pnpm-workspace.yaml.template"),
+		path.join(appDir, "pnpm-workspace.yaml")
 	);
 }
 
@@ -88,9 +109,15 @@ async function generateMonorepo(
 	const workspaceConfig = path.join(
 		templatesDir,
 		"monorepo",
-		"pnpm-workspace.yaml"
+		"pnpm-workspace.yaml.template"
 	);
 	await copyFile(workspaceConfig, path.join(targetPath, "pnpm-workspace.yaml"));
+
+	// Per-app lockfile refresher, for CI that checks out a single app
+	await copyDirectory(
+		path.join(templatesDir, "monorepo", "scripts"),
+		path.join(targetPath, "scripts")
+	);
 
 	// Generate root package.json
 	await generateRootPackageJson(targetPath, config);
@@ -104,15 +131,14 @@ async function generateMonorepo(
 		);
 		const frontendDest = path.join(targetPath, "apps", "web");
 		await copyDirectory(frontendTemplate, frontendDest);
+		await writeAppWorkspaceConfig(templatesDir, frontendDest);
 	}
 
 	// Copy backend if selected
 	if (config.backend !== "none") {
-		await generateBackend(
-			templatesDir,
-			path.join(targetPath, "apps", "backend"),
-			config
-		);
+		const backendDest = path.join(targetPath, "apps", "backend");
+		await generateBackend(templatesDir, backendDest, config);
+		await writeAppWorkspaceConfig(templatesDir, backendDest);
 	}
 }
 
@@ -134,11 +160,13 @@ async function generateStandalone(
 			);
 			const frontendDest = path.join(targetPath, "frontend");
 			await copyDirectory(frontendTemplate, frontendDest);
+			await writeAppWorkspaceConfig(templatesDir, frontendDest);
 		}
 
 		if (config.backend !== "none") {
 			const backendDest = path.join(targetPath, "backend");
 			await generateBackend(templatesDir, backendDest, config);
+			await writeAppWorkspaceConfig(templatesDir, backendDest);
 		}
 
 		// Create root package.json with scripts for both
@@ -183,7 +211,7 @@ async function generateStandaloneRootPackageJson(
 		private: true,
 		engines: {
 			node: ">=20.0.0",
-			pnpm: ">=9.0.0",
+			pnpm: ">=11.0.0",
 		},
 		scripts: {
 			preinstall: "npx only-allow pnpm",
@@ -206,7 +234,6 @@ async function generateStandaloneRootPackageJson(
 			"@types/node": "^26.0.0",
 			typescript: "^6.0.3",
 		},
-		packageManager: "pnpm@10.20.0",
 	};
 
 	await fs.writeJson(path.join(targetPath, "package.json"), packageJson, {
@@ -224,7 +251,16 @@ async function generateRootPackageJson(
 		private: true,
 		engines: {
 			node: ">=20.0.0",
-			pnpm: ">=10.0.0",
+			pnpm: ">=11.0.0",
+		},
+		// Turborepo refuses to resolve a workspace without a package manager
+		// declaration. A range keeps it unpinned; corepack would demand an exact
+		// version, which is why the Dockerfiles install pnpm from npm instead.
+		devEngines: {
+			packageManager: {
+				name: "pnpm",
+				version: "^11.0.0",
+			},
 		},
 		scripts: {
 			preinstall: "npx only-allow pnpm",
@@ -235,6 +271,7 @@ async function generateRootPackageJson(
 			lint: "turbo lint",
 			test: "turbo test",
 			clean: "turbo clean",
+			lockfiles: "node scripts/update-lockfiles.mjs",
 		},
 		devDependencies: {
 			turbo: "^2.10.12",
@@ -243,7 +280,6 @@ async function generateRootPackageJson(
 			prettier: "^3.8.4",
 			eslint: "^10.5.0",
 		},
-		packageManager: "pnpm@10.20.0",
 	};
 
 	await fs.writeJson(path.join(targetPath, "package.json"), packageJson, {
@@ -380,12 +416,6 @@ async function addUILibrary(
 		case "shadcn":
 			await setupShadcn(uiLibraryPath, appPath, frontend);
 			break;
-		case "chakra":
-			await setupChakraUI(uiLibraryPath, appPath, frontend);
-			break;
-		case "daisyui":
-			await setupDaisyUI(uiLibraryPath, appPath, frontend);
-			break;
 	}
 
 	// Update package.json with UI library dependencies
@@ -441,122 +471,6 @@ async function setupShadcn(
 	}
 }
 
-async function setupChakraUI(
-	uiLibraryPath: string,
-	appPath: string,
-	frontendType: string
-): Promise<void> {
-	const chakraPath = path.join(
-		uiLibraryPath,
-		frontendType.startsWith("nextjs") ? "nextjs" : frontendType
-	);
-
-	if (frontendType.startsWith("nextjs")) {
-		// Create providers directory
-		const providersPath = path.join(appPath, "src", "providers");
-		await fs.ensureDir(providersPath);
-
-		// Copy ChakraProvider.tsx and theme.ts to src/providers
-		await copyFile(
-			path.join(chakraPath, "src", "providers", "ChakraProvider.tsx"),
-			path.join(providersPath, "ChakraProvider.tsx")
-		);
-		await copyFile(
-			path.join(chakraPath, "src", "providers", "theme.ts"),
-			path.join(providersPath, "theme.ts")
-		);
-
-		// Copy Chakra UI specific tsconfig.json
-		const tsconfigPath = path.join(appPath, "tsconfig.json");
-		if (await fs.pathExists(path.join(chakraPath, "tsconfig.json"))) {
-			await copyFile(path.join(chakraPath, "tsconfig.json"), tsconfigPath);
-		}
-
-		// Copy Chakra UI specific next.config.ts
-		const nextConfigPath = path.join(appPath, "next.config.ts");
-		if (await fs.pathExists(path.join(chakraPath, "next.config.ts"))) {
-			await copyFile(path.join(chakraPath, "next.config.ts"), nextConfigPath);
-		}
-
-		// Copy pre-configured layout.tsx with Provider already included
-		const layoutPath = path.join(appPath, "src", "app", "layout.tsx");
-		if (
-			await fs.pathExists(path.join(chakraPath, "src", "app", "layout.tsx"))
-		) {
-			await copyFile(
-				path.join(chakraPath, "src", "app", "layout.tsx"),
-				layoutPath
-			);
-		}
-	} else {
-		// For Vite
-		// Copy theme.ts
-		await copyFile(
-			path.join(chakraPath, "src", "theme.ts"),
-			path.join(appPath, "src", "theme.ts")
-		);
-
-		// Copy main.tsx template and rename
-		await copyFile(
-			path.join(chakraPath, "src", "main.tsx.template"),
-			path.join(appPath, "src", "main.tsx")
-		);
-
-		// Copy Chakra UI specific tsconfig.app.json for Vite
-		const tsconfigAppPath = path.join(appPath, "tsconfig.app.json");
-		if (await fs.pathExists(path.join(chakraPath, "tsconfig.app.json"))) {
-			await copyFile(
-				path.join(chakraPath, "tsconfig.app.json"),
-				tsconfigAppPath
-			);
-		}
-
-		// Copy Chakra UI specific vite.config.ts
-		const viteConfigPath = path.join(appPath, "vite.config.ts");
-		if (await fs.pathExists(path.join(chakraPath, "vite.config.ts"))) {
-			await copyFile(path.join(chakraPath, "vite.config.ts"), viteConfigPath);
-		}
-	}
-
-	// Copy example components - always in src
-	const componentsPath = path.join(appPath, "src", "components");
-
-	await fs.ensureDir(componentsPath);
-	if (await fs.pathExists(path.join(chakraPath, "components"))) {
-		await copyDirectory(path.join(chakraPath, "components"), componentsPath);
-	}
-}
-
-async function setupDaisyUI(
-	uiLibraryPath: string,
-	appPath: string,
-	frontendType: string
-): Promise<void> {
-	// Note: Tailwind CSS 4 uses CSS-based configuration, not JS config files
-	// DaisyUI works with Tailwind CSS 4 through CSS imports
-
-	// Replace CSS file with DaisyUI version
-	const cssPath = frontendType.startsWith("nextjs")
-		? path.join(appPath, "src", "app", "globals.css")
-		: path.join(appPath, "src", "index.css");
-
-	if (await fs.pathExists(cssPath)) {
-		const daisyStyles = await fs.readFile(
-			path.join(uiLibraryPath, "styles.css"),
-			"utf-8"
-		);
-		await fs.writeFile(cssPath, daisyStyles);
-	}
-
-	// Copy example components - always in src
-	const componentsPath = path.join(appPath, "src", "components");
-	await fs.ensureDir(componentsPath);
-
-	if (await fs.pathExists(path.join(uiLibraryPath, "components"))) {
-		await copyDirectory(path.join(uiLibraryPath, "components"), componentsPath);
-	}
-}
-
 async function updatePackageJsonForUILibrary(
 	appPath: string,
 	uiLibrary: string,
@@ -587,29 +501,6 @@ async function updatePackageJsonForUILibrary(
 				"class-variance-authority": "^0.7.1",
 				"lucide-react": "^0.468.0",
 				"tw-animate-css": "^1.0.0",
-			});
-			break;
-
-		case "chakra":
-			Object.assign(packageJson.dependencies, {
-				"@chakra-ui/react": "^3.2.3",
-				"@emotion/react": "^11.14.0",
-				"@emotion/styled": "^11.14.0",
-				"framer-motion": "^11.15.0",
-			});
-
-			if (frontendType.startsWith("nextjs")) {
-				packageJson.dependencies["@chakra-ui/next-js"] = "^2.4.2";
-			}
-
-			if (frontendType === "vite") {
-				packageJson.devDependencies["vite-tsconfig-paths"] = "^5.1.4";
-			}
-			break;
-
-		case "daisyui":
-			Object.assign(packageJson.devDependencies, {
-				daisyui: "^5",
 			});
 			break;
 	}

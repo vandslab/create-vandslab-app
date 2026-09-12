@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"engines": {
-		"pnpm": ">=10.0.0"
+		"pnpm": ">=11.0.0"
 	},
 	"files": [
 		"base.json",

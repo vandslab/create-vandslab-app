@@ -1,0 +1,16 @@
+# pnpm reads its settings from this file (not .npmrc) since pnpm 10.
+#
+# nodeLinker: hoisted is required by Prisma 7: the generated client reaches
+# itself through "#" subpath imports and pulls @prisma/client-runtime-utils,
+# neither of which resolves from pnpm's default isolated node_modules.
+nodeLinker: hoisted
+
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# pnpm 11 re-checks dependency status before every `pnpm <cmd>` and silently
+# re-runs install when it thinks node_modules is stale. That implicit install
+# does not inherit --ignore-scripts, so it fails on ERR_PNPM_IGNORED_BUILDS
+# inside Docker builds.
+verifyDepsBeforeRun: false

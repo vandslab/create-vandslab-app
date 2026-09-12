@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UserEntity } from './entity/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import * as bcrypt from 'bcrypt';
+import { hash } from '@node-rs/argon2';
 
 @Injectable()
 export class UserService {
@@ -18,7 +18,7 @@ export class UserService {
       throw new ConflictException('Email already in use');
     }
 
-    const hashedPassword = await bcrypt.hash(dto.password, 12);
+    const hashedPassword = await hash(dto.password);
 
     const { password, ...user } = await this.prisma.user.create({
       data: { ...dto, password: hashedPassword },

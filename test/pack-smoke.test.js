@@ -104,9 +104,26 @@ function assertProjectInvariants(project, config, roots) {
   // --- shape: the root and every app are installable ---
   assert.ok(files.includes('package.json'), 'missing root package.json');
   assert.ok(files.includes('README.md'), 'missing generated README.md');
+
+  // pnpm 10+ reads nodeLinker from here, and Prisma 7 does not resolve without
+  // hoisted node_modules. A project without this file installs into a layout
+  // where @prisma/client cannot load itself.
+  // ...at the project root, and in every app directory, because CI may check
+  // out a single app and that copy has no workspace root above it.
+  for (const dir of ['.', ...roots]) {
+    const cfg = join(dir, 'pnpm-workspace.yaml');
+    assert.ok(files.includes(cfg), `missing ${cfg}`);
+    assert.match(readText(cfg), /^nodeLinker: hoisted$/m, `${cfg} does not set nodeLinker: hoisted`);
+  }
   assert.equal(typeof readJson('package.json').name, 'string', 'root package.json has no name');
   for (const root of roots) {
     assert.ok(files.includes(join(root, 'package.json')), `missing ${join(root, 'package.json')}`);
+    // npm strips real .gitignore files out of the tarball, so every template
+    // must ship gitignore.template instead. This is the regression guard.
+    assert.ok(
+      files.includes(join(root, '.gitignore')),
+      `missing ${join(root, '.gitignore')} — the template needs a gitignore.template`
+    );
   }
 
   // --- Docker vs. VCS: a lockfile a Dockerfile COPYs must be committable ---
@@ -165,7 +182,6 @@ for (const config of STACKS) {
     const gaps = [];
 
     for (const root of roots) {
-      if (!files.includes(join(root, '.gitignore'))) gaps.push(`no ${join(root, '.gitignore')}`);
       const scripts = readJson(join(root, 'package.json')).scripts ?? {};
       if (!scripts.typecheck) gaps.push(`${root} has no typecheck script`);
     }

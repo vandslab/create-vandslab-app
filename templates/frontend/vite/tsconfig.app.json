@@ -24,8 +24,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    /* Path mappings */
-    "baseUrl": ".",
+    /* Path mappings — no baseUrl: deprecated in TypeScript 6 */
     "paths": {
       "@/*": ["./src/*"]
     }

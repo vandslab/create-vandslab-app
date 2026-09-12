@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@/config/jwt";
 import prisma from "@utils/prisma-client";
-import { Role } from "@prisma/client";
+import { Role } from "../generated";
 import {
 	AuthError,
 	InsufficientPermissionError,

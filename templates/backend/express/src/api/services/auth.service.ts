@@ -1,13 +1,11 @@
 import { AuthError, InvalidCredentialsError } from "@/exceptions/auth-error";
 import prisma from "@/utils/prisma-client";
-import { User } from "@prisma/client";
-import bcrypt from "bcrypt";
+import type { User } from "../../generated";
+import { hash, verify } from "@node-rs/argon2";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "@/config/jwt";
 
 export class AuthService {
-	private readonly saltRounds = 10;
-
 	constructor() {}
 
 	/**
@@ -29,7 +27,7 @@ export class AuthService {
 		}
 
 		// Hash password
-		const hashedPassword = await bcrypt.hash(password, this.saltRounds);
+		const hashedPassword = await hash(password);
 
 		// Create user
 		const newUser = await prisma.user.create({
@@ -62,7 +60,7 @@ export class AuthService {
 		}
 
 		// Verify password
-		const isPasswordValid = await bcrypt.compare(password, user.password);
+		const isPasswordValid = await verify(user.password, password);
 		if (!isPasswordValid) {
 			throw new InvalidCredentialsError();
 		}
@@ -114,7 +112,7 @@ export class AuthService {
 		}
 
 		// Hash password
-		const hashedPassword = await bcrypt.hash(password, this.saltRounds);
+		const hashedPassword = await hash(password);
 
 		const newUser = await prisma.user.create({
 			data: {

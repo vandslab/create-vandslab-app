@@ -33,7 +33,7 @@ build
 *.sqlite3
 *.db
 /prisma/migrations/dev/
-/src/generated/prisma
+/src/generated
 
 # Logs
 logs

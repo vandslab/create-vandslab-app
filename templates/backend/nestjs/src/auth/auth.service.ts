@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import { hash, verify } from '@node-rs/argon2';
 import { User } from '../users/entities/user.entity';
 import { LoginDto, LoginResponseDto } from './dto/login.dto';
 import { RegisterDto, RegisterResponseDto } from './dto/register.dto';
@@ -29,7 +29,7 @@ export class AuthService {
 		}
 
 		// Hash password
-		const hashedPassword = await bcrypt.hash(password, 10);
+		const hashedPassword = await hash(password);
 
 		// Create new user
 		const user = this.usersRepository.create({
@@ -66,7 +66,7 @@ export class AuthService {
 		}
 
 		// Check password
-		const isPasswordValid = await bcrypt.compare(password, user.password);
+		const isPasswordValid = await verify(user.password, password);
 
 		if (!isPasswordValid) {
 			throw new UnauthorizedException('Invalid credentials');

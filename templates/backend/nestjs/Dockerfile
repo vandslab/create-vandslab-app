@@ -2,34 +2,39 @@
 FROM node:22-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+RUN npm install -g pnpm@11
 
-# Install system deps (for native modules)
 RUN apk update && \
     apk add --no-cache python3 make g++ libc6-compat && \
     rm -rf /var/cache/apk/*
 
-# ---------- Dependencies & Build ----------
+# ---------- Production dependencies ----------
+FROM base AS prod-deps
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm install --prod --ignore-scripts --frozen-lockfile
+
+RUN rm -rf node_modules/.pnpm
+
+# ---------- Build ----------
 FROM base AS build
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Install all dependencies (incl. devDeps so the Nest CLI is available)
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --ignore-scripts --frozen-lockfile
 
-# Copy source code
 COPY . .
 
-# Build NestJS
-RUN pnpm run build
+RUN pnpm test
 
-# Strip devDeps from node_modules
-RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm prune --prod --ignore-scripts
+RUN pnpm run build
 
 # ---------- Runtime ----------
 FROM node:22-alpine AS runtime
@@ -40,8 +45,7 @@ WORKDIR /app
 RUN chown nestjs:nodejs /app
 USER nestjs
 
-# Copy pruned node_modules (prod-only) and build output
-COPY --chown=nestjs:nodejs --from=build /app/node_modules ./node_modules
+COPY --chown=nestjs:nodejs --from=prod-deps /app/node_modules ./node_modules
 COPY --chown=nestjs:nodejs --from=build /app/dist ./dist
 COPY --chown=nestjs:nodejs --from=build /app/package.json ./package.json
 

@@ -2,6 +2,10 @@
 	"name": "{{PROJECT_NAME}}",
 	"type": "module",
 	"private": true,
+	"engines": {
+		"node": ">=20.0.0",
+		"pnpm": ">=11.0.0"
+	},
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"build": "nuxt build",

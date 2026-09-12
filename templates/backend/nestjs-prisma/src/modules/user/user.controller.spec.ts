@@ -8,7 +8,8 @@ describe('UserController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UserController],
-      providers: [UserService],
+      // Stubbed so the controller can be resolved without a database.
+      providers: [{ provide: UserService, useValue: {} }],
     }).compile();
 
     controller = module.get<UserController>(UserController);

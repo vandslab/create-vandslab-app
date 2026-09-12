@@ -1,38 +1,30 @@
 # ---------- Build Stage ----------
 FROM node:22-alpine AS builder
 
-# Enable pnpm
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+RUN npm install -g pnpm@11
 
 WORKDIR /app
 
 ENV NEXT_PUBLIC_API_URL=/api
 
-
-# Copy everything (node_modules and .next excluded via .dockerignore)
 COPY . .
 
-# Install dependencies and build
-# pnpm 11 errors on un-approved build scripts. Skip all (sharp uses prebuilt binaries via optional deps, no postinstall needed)
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --ignore-scripts && pnpm run build
 
 # ---------- Production Stage ----------
 FROM node:22-alpine
 
-# Create non-root user first
 RUN addgroup --system --gid 99995 nodejs && \
     adduser --system --uid 99995 nextjs
 
 WORKDIR /app
 RUN chown nextjs:nodejs /app
 
-# Switch to non-root user before copying
 USER nextjs
 
-# Copy Next.js standalone build output with correct ownership
 COPY --chown=nextjs:nodejs --from=builder /app/.next/standalone ./
 COPY --chown=nextjs:nodejs --from=builder /app/.next/static ./.next/static
 COPY --chown=nextjs:nodejs --from=builder /app/public ./public
@@ -42,5 +34,4 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-# Start Next.js standalone server directly with node
 CMD ["node", "server.js"]

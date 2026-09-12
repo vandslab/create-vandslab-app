@@ -10,7 +10,7 @@ export interface ProjectConfig {
   backend: 'express' | 'nestjs' | 'nestjs-prisma' | 'none';
   // Not prompted in the CLI anymore; kept so the (retained) UI-library
   // helpers in generator.ts still type-check. Always 'none' at runtime.
-  uiLibrary: 'none' | 'shadcn' | 'chakra' | 'daisyui';
+  uiLibrary: 'none' | 'shadcn';
   targetPath: string;
 }
 
