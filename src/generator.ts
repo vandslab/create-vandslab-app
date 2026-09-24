@@ -341,12 +341,10 @@ async function generateReadme(
 		} else if (backend === "nestjs") {
 			readme += `- **Backend**: NestJS + TypeScript\n`;
 			readme += `- **Database**: PostgreSQL with TypeORM\n`;
-			readme += `- **Auth**: JWT Authentication\n`;
 			readme += `- **API Docs**: Swagger/OpenAPI\n`;
 		} else if (backend === "nestjs-prisma") {
 			readme += `- **Backend**: NestJS + TypeScript\n`;
 			readme += `- **Database**: PostgreSQL with Prisma\n`;
-			readme += `- **Auth**: JWT Authentication\n`;
 			readme += `- **API Docs**: Swagger/OpenAPI\n`;
 		}
 	}

@@ -10,6 +10,12 @@ import fs from "fs";
  * Serves interactive API docs at /api-docs
  */
 export const setupSwagger = (app: Application): void => {
+	// Development only. Outside development the route is never mounted, so
+	// /api-docs 404s rather than exposing the schema.
+	if (process.env.NODE_ENV !== "development") {
+		return;
+	}
+
 	try {
 		// Load auto-generated Swagger JSON file (from swagger-autogen)
 		const swaggerPath = path.join(__dirname, "../docs/swagger-output.json");

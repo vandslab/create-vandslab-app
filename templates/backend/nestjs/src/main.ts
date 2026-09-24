@@ -1,42 +1,77 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { RequestInterceptor } from '@/common/interceptors/request.interceptor';
+import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes';
 
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule);
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
-	// Enable CORS
-	app.enableCors({
-		origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-		credentials: true,
-	});
+  const app = await NestFactory.create(AppModule, {
+    logger:
+      process.env.NODE_ENV === 'production'
+        ? ['error', 'log', 'warn']
+        : ['log', 'error', 'warn', 'debug'],
+    bodyParser: false,
+  });
+  const logger = new Logger();
+  app.useGlobalInterceptors(new RequestInterceptor());
 
-	// Global validation pipe
-	app.useGlobalPipes(
-		new ValidationPipe({
-			whitelist: true, // Strip props that don't have decorators
-			forbidNonWhitelisted: true, // Throw error if non-whitelisted props exist
-			transform: true, // Transform payloads to DTO instances
-		}),
-	);
+  // validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
-	// Swagger API documentation
-	const config = new DocumentBuilder()
-		.setTitle('{{PROJECT_NAME}} API')
-		.setDescription('API documentation for {{PROJECT_NAME}} backend')
-		.setVersion('1.0')
-		.addBearerAuth()
-		.build();
+  // CORS
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true, // for cookies
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
-	const document = SwaggerModule.createDocument(app, config);
-	SwaggerModule.setup('api', app, document);
+  // Swagger config
+  const config = new DocumentBuilder()
+    .setTitle('===== PROJECT =====')
+    .setDescription('===== PROJECT DESCRIPTION =====')
+    .setVersion('1.0')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'bearerAuth',
+    )
+    // Global responses
+    .addGlobalResponse({
+      status: 500,
+      description: 'Internal server error',
+    })
+    .addServer('http://localhost:4000', 'Local development endpoint')
+    .addServer('https://production.url.com', 'Production endpoint')
+    .build();
 
-	const port = process.env.PORT || 4000;
-	await app.listen(port);
+  app.setGlobalPrefix('/api');
 
-	console.log(`🚀 Server running on http://localhost:${port}`);
-	console.log(`📚 Swagger docs available at http://localhost:${port}/api`);
+  // API docs are development-only. Outside development the route is never
+  // registered at all, so /api/docs 404s rather than exposing the schema.
+  if (isDevelopment) {
+    const document = SwaggerModule.createDocument(app, config);
+    const theme = new SwaggerTheme();
+    const options = {
+      customCss: theme.getBuffer(SwaggerThemeNameEnum.DRACULA),
+    };
+
+    SwaggerModule.setup('/api/docs', app, document, options);
+  }
+
+  await app.listen(process.env.PORT ?? 4000);
+
+  logger.log(`Server: http://localhost:${process.env.PORT}`);
+  if (isDevelopment) {
+    logger.log(`Swagger: http://localhost:${process.env.PORT}/api/docs`);
+  }
 }
-
 bootstrap();

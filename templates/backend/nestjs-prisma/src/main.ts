@@ -6,6 +6,8 @@ import { RequestInterceptor } from '@/common/interceptors/request.interceptor';
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes';
 
 async function bootstrap() {
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
   const app = await NestFactory.create(AppModule, {
     logger:
       process.env.NODE_ENV === 'production'
@@ -53,17 +55,23 @@ async function bootstrap() {
 
   app.setGlobalPrefix('/api');
 
-  const document = SwaggerModule.createDocument(app, config);
-  const theme = new SwaggerTheme();
-  const options = {
-    customCss: theme.getBuffer(SwaggerThemeNameEnum.DRACULA),
-  };
+  // API docs are development-only. Outside development the route is never
+  // registered at all, so /api/docs 404s rather than exposing the schema.
+  if (isDevelopment) {
+    const document = SwaggerModule.createDocument(app, config);
+    const theme = new SwaggerTheme();
+    const options = {
+      customCss: theme.getBuffer(SwaggerThemeNameEnum.DRACULA),
+    };
 
-  SwaggerModule.setup('/api/docs', app, document, options);
+    SwaggerModule.setup('/api/docs', app, document, options);
+  }
 
   await app.listen(process.env.PORT ?? 4000);
 
   logger.log(`Server: http://localhost:${process.env.PORT}`);
-  logger.log(`Swagger: http://localhost:${process.env.PORT}/api/docs`);
+  if (isDevelopment) {
+    logger.log(`Swagger: http://localhost:${process.env.PORT}/api/docs`);
+  }
 }
 bootstrap();
