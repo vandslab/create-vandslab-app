@@ -13,7 +13,6 @@ async function bootstrap() {
       process.env.NODE_ENV === 'production'
         ? ['error', 'log', 'warn']
         : ['log', 'error', 'warn', 'debug'],
-    bodyParser: false,
   });
   const logger = new Logger();
   app.useGlobalInterceptors(new RequestInterceptor());
